@@ -1,5 +1,3 @@
-name: Deploy to Azure Web App
-
 on:
   push:
     branches:

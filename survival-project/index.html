@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Manager</title>
+    <style>
+        body {
+            font-family: Arial;
+            padding: 20px;
+            background: #f4f4f4;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        input {
+            padding: 8px;
+            margin: 5px;
+        }
+
+        button {
+            padding: 8px 15px;
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        li {
+            background: white;
+            margin: 5px 0;
+            padding: 10px;
+            list-style: none;
+        }
+    </style>
+</head>
+<body>
+
+<h1>User Manager</h1>
+
+<h3>Register</h3>
+
+<input id="email" placeholder="Email">
+<input id="password" type="password" placeholder="Password">
+
+<button onclick="register()">Register</button>
+<button onclick="login()">Login</button>
+
+<input id="name" placeholder="Name">
+<input id="age" placeholder="Age">
+<button onclick="addUser()">Add User</button>
+
+<h3>Users List</h3>
+
+<button onclick="loadUsers()">Refresh</button>
+
+<ul id="users"></ul>
+
+<script>
+
+async function loadUsers() {
+    const res = await fetch("http://127.0.0.1:4000/users");
+    const users = await res.json();
+
+    const list = document.getElementById("users");
+    list.innerHTML = "";
+
+    users.forEach(user => {
+        const li = document.createElement("li");
+        li.innerText = user.name + " (" + user.age + ")";
+        list.appendChild(li);
+    });
+}
+
+async function addUser() {
+    const name = document.getElementById("name").value;
+    const age = document.getElementById("age").value;
+
+    await fetch("http://127.0.0.1:4000/add-user", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            name: name,
+            age: Number(age)
+        })
+    });
+
+    loadUsers();
+}
+
+loadUsers();
+
+</script> async function register() {
+  const email =
+    document.getElementById("email").value;
+
+  const password =
+    document.getElementById("password").value;
+
+  const res = await fetch(
+    "http://127.0.0.1:4000/register",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        email,
+        password
+      })
+    }
+  );
+
+  const data = await res.json();
+  alert(data.message);
+}
+
+async function login() {
+  const email =
+    document.getElementById("email").value;
+
+  const password =
+    document.getElementById("password").value;
+
+  const res = await fetch(
+    "http://127.0.0.1:4000/login",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        email,
+        password
+      })
+    }
+  );
+
+  const data = await res.json();
+  alert(data.message);
+}
+</body>
+</html>

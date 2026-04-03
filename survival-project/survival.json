@@ -1,0 +1,10 @@
+{
+  "users": [
+    {
+      "id": "3yWa4iRT11qTBQEAnuqQ-",
+      "email": "anurag@test.com",
+      "password": "1234",
+      "role": "user"
+    }
+  ]
+}

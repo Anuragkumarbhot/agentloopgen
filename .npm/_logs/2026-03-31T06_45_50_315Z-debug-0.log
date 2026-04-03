@@ -1,0 +1,126 @@
+0 verbose cli /data/data/com.termux/files/usr/bin/node /data/data/com.termux/files/usr/bin/npm
+1 info using npm@11.12.1
+2 info using node@v25.8.2
+3 silly config load:file:/data/data/com.termux/files/usr/lib/node_modules/npm/npmrc
+4 silly config load:file:/data/data/com.termux/files/home/projects/workout-app/frontend/.npmrc
+5 silly config load:file:/data/data/com.termux/files/home/.npmrc
+6 silly config load:file:/data/data/com.termux/files/usr/etc/npmrc
+7 verbose title npm install typescript @types/node @types/react @types/react-dom
+8 verbose argv "install" "--save-dev" "typescript" "@types/node" "@types/react" "@types/react-dom"
+9 verbose logfile logs-max:10 dir:/data/data/com.termux/files/home/.npm/_logs/2026-03-31T06_45_50_315Z-
+10 verbose logfile /data/data/com.termux/files/home/.npm/_logs/2026-03-31T06_45_50_315Z-debug-0.log
+11 silly logfile start cleaning logs, removing 1 files
+12 silly packumentCache heap:1174405120 maxSize:293601280 maxEntrySize:146800640
+13 silly logfile done cleaning log files
+14 silly idealTree buildDeps
+15 silly fetch manifest typescript@*
+16 silly packumentCache full:https://registry.npmjs.org/typescript cache-miss
+17 http fetch GET 200 https://registry.npmjs.org/typescript 519ms (cache revalidated)
+18 silly packumentCache full:https://registry.npmjs.org/typescript set size:15395755 disposed:false
+19 silly fetch manifest @types/node@*
+20 silly packumentCache full:https://registry.npmjs.org/@types%2fnode cache-miss
+21 http fetch GET 200 https://registry.npmjs.org/@types%2fnode 202ms (cache revalidated)
+22 silly packumentCache full:https://registry.npmjs.org/@types%2fnode set size:10939971 disposed:false
+23 silly fetch manifest @types/react@*
+24 silly packumentCache full:https://registry.npmjs.org/@types%2freact cache-miss
+25 http fetch GET 200 https://registry.npmjs.org/@types%2freact 162ms (cache revalidated)
+26 silly packumentCache full:https://registry.npmjs.org/@types%2freact set size:2588986 disposed:false
+27 silly fetch manifest @types/react-dom@*
+28 silly packumentCache full:https://registry.npmjs.org/@types%2freact-dom cache-miss
+29 http fetch GET 200 https://registry.npmjs.org/@types%2freact-dom 121ms (cache revalidated)
+30 silly packumentCache full:https://registry.npmjs.org/@types%2freact-dom set size:429026 disposed:false
+31 silly placeDep ROOT @types/node@25.5.0 OK for: frontend@1.0.0 want: *
+32 silly placeDep ROOT @types/react@19.2.14 OK for: frontend@1.0.0 want: *
+33 silly placeDep ROOT @types/react-dom@19.2.3 OK for: frontend@1.0.0 want: *
+34 silly placeDep ROOT typescript@6.0.2 OK for: frontend@1.0.0 want: *
+35 silly fetch manifest undici-types@~7.18.0
+36 silly packumentCache full:https://registry.npmjs.org/undici-types cache-miss
+37 silly fetch manifest csstype@^3.2.2
+38 silly packumentCache full:https://registry.npmjs.org/csstype cache-miss
+39 http fetch GET 200 https://registry.npmjs.org/undici-types 121ms (cache revalidated)
+40 silly packumentCache full:https://registry.npmjs.org/undici-types set size:192102 disposed:false
+41 http fetch GET 200 https://registry.npmjs.org/csstype 231ms (cache revalidated)
+42 silly packumentCache full:https://registry.npmjs.org/csstype set size:274189 disposed:false
+43 silly placeDep ROOT undici-types@7.18.2 OK for: @types/node@25.5.0 want: ~7.18.0
+44 silly placeDep ROOT csstype@3.2.3 OK for: @types/react@19.2.14 want: ^3.2.2
+45 silly reify moves {}
+46 silly audit bulk request {
+46 silly audit   '@emnapi/runtime': [ '1.9.1' ],
+46 silly audit   '@img/colour': [ '1.1.0' ],
+46 silly audit   '@img/sharp-darwin-arm64': [ '0.34.5' ],
+46 silly audit   '@img/sharp-darwin-x64': [ '0.34.5' ],
+46 silly audit   '@img/sharp-libvips-darwin-arm64': [ '1.2.4' ],
+46 silly audit   '@img/sharp-libvips-darwin-x64': [ '1.2.4' ],
+46 silly audit   '@img/sharp-libvips-linux-arm': [ '1.2.4' ],
+46 silly audit   '@img/sharp-libvips-linux-arm64': [ '1.2.4' ],
+46 silly audit   '@img/sharp-libvips-linux-ppc64': [ '1.2.4' ],
+46 silly audit   '@img/sharp-libvips-linux-riscv64': [ '1.2.4' ],
+46 silly audit   '@img/sharp-libvips-linux-s390x': [ '1.2.4' ],
+46 silly audit   '@img/sharp-libvips-linux-x64': [ '1.2.4' ],
+46 silly audit   '@img/sharp-libvips-linuxmusl-arm64': [ '1.2.4' ],
+46 silly audit   '@img/sharp-libvips-linuxmusl-x64': [ '1.2.4' ],
+46 silly audit   '@img/sharp-linux-arm': [ '0.34.5' ],
+46 silly audit   '@img/sharp-linux-arm64': [ '0.34.5' ],
+46 silly audit   '@img/sharp-linux-ppc64': [ '0.34.5' ],
+46 silly audit   '@img/sharp-linux-riscv64': [ '0.34.5' ],
+46 silly audit   '@img/sharp-linux-s390x': [ '0.34.5' ],
+46 silly audit   '@img/sharp-linux-x64': [ '0.34.5' ],
+46 silly audit   '@img/sharp-linuxmusl-arm64': [ '0.34.5' ],
+46 silly audit   '@img/sharp-linuxmusl-x64': [ '0.34.5' ],
+46 silly audit   '@img/sharp-wasm32': [ '0.34.5' ],
+46 silly audit   '@img/sharp-win32-arm64': [ '0.34.5' ],
+46 silly audit   '@img/sharp-win32-ia32': [ '0.34.5' ],
+46 silly audit   '@img/sharp-win32-x64': [ '0.34.5' ],
+46 silly audit   '@next/env': [ '16.2.1' ],
+46 silly audit   '@next/swc-darwin-arm64': [ '16.2.1' ],
+46 silly audit   '@next/swc-darwin-x64': [ '16.2.1' ],
+46 silly audit   '@next/swc-linux-arm64-gnu': [ '16.2.1' ],
+46 silly audit   '@next/swc-linux-arm64-musl': [ '16.2.1' ],
+46 silly audit   '@next/swc-linux-x64-gnu': [ '16.2.1' ],
+46 silly audit   '@next/swc-linux-x64-musl': [ '16.2.1' ],
+46 silly audit   '@next/swc-win32-arm64-msvc': [ '16.2.1' ],
+46 silly audit   '@next/swc-win32-x64-msvc': [ '16.2.1' ],
+46 silly audit   '@swc/helpers': [ '0.5.15' ],
+46 silly audit   'baseline-browser-mapping': [ '2.10.12' ],
+46 silly audit   'caniuse-lite': [ '1.0.30001782' ],
+46 silly audit   'client-only': [ '0.0.1' ],
+46 silly audit   'detect-libc': [ '2.1.2' ],
+46 silly audit   nanoid: [ '3.3.11' ],
+46 silly audit   next: [ '16.2.1' ],
+46 silly audit   picocolors: [ '1.1.1' ],
+46 silly audit   postcss: [ '8.4.31' ],
+46 silly audit   react: [ '19.2.4' ],
+46 silly audit   'react-dom': [ '19.2.4' ],
+46 silly audit   scheduler: [ '0.27.0' ],
+46 silly audit   semver: [ '7.7.4' ],
+46 silly audit   sharp: [ '0.34.5' ],
+46 silly audit   'source-map-js': [ '1.2.1' ],
+46 silly audit   'styled-jsx': [ '5.1.6' ],
+46 silly audit   tslib: [ '2.8.1' ],
+46 silly audit   '@types/node': [ '25.5.0' ],
+46 silly audit   '@types/react': [ '19.2.14' ],
+46 silly audit   '@types/react-dom': [ '19.2.3' ],
+46 silly audit   typescript: [ '6.0.2' ],
+46 silly audit   'undici-types': [ '7.18.2' ],
+46 silly audit   csstype: [ '3.2.3' ]
+46 silly audit }
+47 http cache undici-types@https://registry.npmjs.org/undici-types/-/undici-types-7.18.2.tgz 0ms (cache hit)
+48 http cache @types/react-dom@https://registry.npmjs.org/@types/react-dom/-/react-dom-19.2.3.tgz 0ms (cache hit)
+49 http cache csstype@https://registry.npmjs.org/csstype/-/csstype-3.2.3.tgz 0ms (cache hit)
+50 http cache @types/node@https://registry.npmjs.org/@types/node/-/node-25.5.0.tgz 0ms (cache hit)
+51 http cache typescript@https://registry.npmjs.org/typescript/-/typescript-6.0.2.tgz 0ms (cache hit)
+52 http cache @types/react@https://registry.npmjs.org/@types/react/-/react-19.2.14.tgz 0ms (cache hit)
+53 http fetch POST 200 https://registry.npmjs.org/-/npm/v1/security/advisories/bulk 344ms
+54 silly audit report {}
+55 silly ADD node_modules/csstype
+56 silly ADD node_modules/undici-types
+57 silly ADD node_modules/typescript
+58 silly ADD node_modules/@types/react-dom
+59 silly ADD node_modules/@types/react
+60 silly ADD node_modules/@types/node
+61 verbose cwd /data/data/com.termux/files/home/projects/workout-app/frontend
+62 verbose os Linux 5.4.259-qgki-g43c1fc451c85
+63 verbose node v25.8.2
+64 verbose npm  v11.12.1
+65 verbose exit 0
+66 info ok

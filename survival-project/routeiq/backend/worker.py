@@ -1,74 +1,150 @@
-import os
 import time
-import psycopg2
+from datetime import datetime
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
-DATABASE_URL = os.environ.get("DATABASE_URL")
+from main import Job, DATABASE_URL
+
+# -------------------------
+# DATABASE
+# -------------------------
+
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True
+)
+
+SessionLocal = sessionmaker(
+    autocommit=False,
+    autoflush=False,
+    bind=engine
+)
+
+# -------------------------
+# EXECUTION ENGINE
+# -------------------------
+
+def execute_task(task):
+
+    print(f"Running task: {task}")
+
+    # Example tasks
+    if task == "send_email":
+
+        time.sleep(2)
+
+        print("Email sent")
+
+        return True
+
+    elif task == "generate_report":
+
+        time.sleep(3)
+
+        print("Report generated")
+
+        return True
+
+    elif task == "process_data":
+
+        time.sleep(2)
+
+        print("Data processed")
+
+        return True
+
+    else:
+
+        print("Unknown task")
+
+        return True
 
 
-def get_connection():
-    return psycopg2.connect(DATABASE_URL)
+# -------------------------
+# PROCESS JOB
+# -------------------------
 
+def process_job(job, db):
 
-def process_job(job_id, task):
+    try:
 
-    print(f"Processing job {job_id}: {task}")
+        job.status = "running"
 
-    time.sleep(5)
+        job.attempts += 1
 
-    conn = get_connection()
-    cur = conn.cursor()
+        job.updated_at = datetime.utcnow()
 
-    cur.execute(
-        "UPDATE jobs SET status = 'completed' WHERE id = %s",
-        (job_id,)
-    )
+        db.commit()
 
-    conn.commit()
+        success = execute_task(job.task)
 
-    cur.close()
-    conn.close()
+        if success:
 
-
-def worker_loop():
-
-    while True:
-
-        conn = get_connection()
-        cur = conn.cursor()
-
-        cur.execute("""
-            SELECT id, task
-            FROM jobs
-            WHERE status = 'pending'
-            ORDER BY id
-            LIMIT 1
-        """)
-
-        job = cur.fetchone()
-
-        if job:
-
-            job_id, task = job
-
-            cur.execute(
-                "UPDATE jobs SET status = 'running' WHERE id = %s",
-                (job_id,)
-            )
-
-            conn.commit()
-
-            cur.close()
-            conn.close()
-
-            process_job(job_id, task)
+            job.status = "completed"
 
         else:
 
-            cur.close()
-            conn.close()
+            if job.attempts < job.max_attempts:
 
-            time.sleep(3)
+                job.status = "retrying"
+
+            else:
+
+                job.status = "failed"
+
+        job.updated_at = datetime.utcnow()
+
+        db.commit()
+
+    except Exception as e:
+
+        print("Error:", e)
+
+        if job.attempts < job.max_attempts:
+
+            job.status = "retrying"
+
+        else:
+
+            job.status = "failed"
+
+        job.updated_at = datetime.utcnow()
+
+        db.commit()
+
+
+# -------------------------
+# WORKER LOOP
+# -------------------------
+
+def worker():
+
+    print("Worker started")
+
+    while True:
+
+        db = SessionLocal()
+
+        job = (
+            db.query(Job)
+            .filter(
+                Job.status.in_(["pending", "retrying"])
+            )
+            .order_by(Job.id)
+            .first()
+        )
+
+        if job:
+
+            print(f"Processing job {job.id}")
+
+            process_job(job, db)
+
+        db.close()
+
+        time.sleep(5)
 
 
 if __name__ == "__main__":
-    worker_loop()
+
+    worker()

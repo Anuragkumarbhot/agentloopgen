@@ -1,6 +1,4 @@
 from fastapi import FastAPI
-from sqlalchemy import text
-from database import engine
 
 app = FastAPI(
     title="AgentLoopGen",
@@ -22,18 +20,10 @@ def health():
     }
 
 
-@app.get("/db-health")
-def db_health():
-    try:
-        with engine.connect() as conn:
-            conn.execute(text("SELECT 1"))
-
-        return {
-            "database": "connected"
-        }
-
-    except Exception as e:
-        return {
-            "database": "error",
-            "message": str(e)
-        }
+@app.get("/info")
+def info():
+    return {
+        "service": "AgentLoopGen",
+        "version": "1.0",
+        "environment": "production"
+    }

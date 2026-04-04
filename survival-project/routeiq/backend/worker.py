@@ -5,8 +5,9 @@ from sqlalchemy.orm import sessionmaker
 
 from main import Job, DATABASE_URL
 
+
 # -------------------------
-# DATABASE
+# DATABASE CONNECTION
 # -------------------------
 
 engine = create_engine(
@@ -20,44 +21,46 @@ SessionLocal = sessionmaker(
     bind=engine
 )
 
+
 # -------------------------
 # EXECUTION ENGINE
 # -------------------------
 
 def execute_task(task):
 
-    print(f"Running task: {task}")
+    print("Running task:", task)
 
-    # Example tasks
-    if task == "send_email":
+    try:
 
-        time.sleep(2)
+        if task == "send_email":
 
-        print("Email sent")
+            time.sleep(2)
 
-        return True
+            print("Email sent")
 
-    elif task == "generate_report":
+        elif task == "generate_report":
 
-        time.sleep(3)
+            time.sleep(3)
 
-        print("Report generated")
+            print("Report generated")
 
-        return True
+        elif task == "process_data":
 
-    elif task == "process_data":
+            time.sleep(2)
 
-        time.sleep(2)
+            print("Data processed")
 
-        print("Data processed")
+        else:
 
-        return True
-
-    else:
-
-        print("Unknown task")
+            print("Unknown task")
 
         return True
+
+    except Exception as e:
+
+        print("Task error:", e)
+
+        return False
 
 
 # -------------------------
@@ -98,23 +101,29 @@ def process_job(job, db):
 
     except Exception as e:
 
-        print("Error:", e)
+        print("Process job error:", e)
 
-        if job.attempts < job.max_attempts:
+        try:
 
-            job.status = "retrying"
+            if job.attempts < job.max_attempts:
 
-        else:
+                job.status = "retrying"
 
-            job.status = "failed"
+            else:
 
-        job.updated_at = datetime.utcnow()
+                job.status = "failed"
 
-        db.commit()
+            job.updated_at = datetime.utcnow()
+
+            db.commit()
+
+        except Exception as db_error:
+
+            print("Database error:", db_error)
 
 
 # -------------------------
-# WORKER LOOP
+# WORKER LOOP (SAFE)
 # -------------------------
 
 def worker():
@@ -123,27 +132,47 @@ def worker():
 
     while True:
 
-        db = SessionLocal()
+        db = None
 
-        job = (
-            db.query(Job)
-            .filter(
-                Job.status.in_(["pending", "retrying"])
+        try:
+
+            db = SessionLocal()
+
+            job = (
+                db.query(Job)
+                .filter(
+                    Job.status.in_(["pending", "retrying"])
+                )
+                .order_by(Job.id)
+                .first()
             )
-            .order_by(Job.id)
-            .first()
-        )
 
-        if job:
+            if job:
 
-            print(f"Processing job {job.id}")
+                print("Processing job:", job.id)
 
-            process_job(job, db)
+                process_job(job, db)
 
-        db.close()
+            else:
+
+                print("No pending jobs")
+
+        except Exception as e:
+
+            print("Worker error:", e)
+
+        finally:
+
+            if db:
+
+                db.close()
 
         time.sleep(5)
 
+
+# -------------------------
+# START WORKER
+# -------------------------
 
 if __name__ == "__main__":
 

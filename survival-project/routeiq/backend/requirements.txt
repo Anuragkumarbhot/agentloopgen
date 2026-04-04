@@ -1,6 +1,5 @@
-fastapi
-uvicorn
-sqlalchemy
-redis
-python-dotenv
-pydantic
+cd ~/agentloopgen
+
+git add .
+git commit -m "Phase 1 foundation"
+git push

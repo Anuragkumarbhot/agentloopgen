@@ -3,10 +3,11 @@ import os
 
 app = FastAPI(
     title="AgentLoopGen",
-    version="1.0"
+    version="2.0"
 )
 
 
+# Root endpoint
 @app.get("/")
 def root():
     return {
@@ -16,24 +17,29 @@ def root():
     }
 
 
+# Health check
 @app.get("/health")
 def health():
     return {
-        "status": "healthy"
+        "status": "healthy",
+        "service": "backend"
     }
 
 
-@app.get("/info")
-def info():
-    return {
-        "app": "AgentLoopGen",
-        "environment": os.getenv("ENVIRONMENT", "production")
-    }
-
-
+# Database health check (simple test endpoint)
 @app.get("/db-health")
 def db_health():
     return {
         "database": "connected",
         "status": "ok"
-    }l
+    }
+
+
+# Info endpoint
+@app.get("/info")
+def info():
+    return {
+        "app": "AgentLoopGen",
+        "environment": os.getenv("ENVIRONMENT", "production"),
+        "version": "2.0"
+    }

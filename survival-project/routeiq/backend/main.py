@@ -1,5 +1,39 @@
-cd ~/agentloopgen
+from fastapi import FastAPI
+from database import check_db
+import os
 
-git add .
-git commit -m "Phase 1 foundation"
-git push
+app = FastAPI(
+    title="AgentLoopGen API",
+    version="2.0.0"
+)
+
+
+@app.get("/")
+def root():
+    return {
+        "status": "AgentLoopGen running",
+        "phase": "Phase 2",
+        "service": "backend"
+    }
+
+
+@app.get("/health")
+def health():
+    return {
+        "status": "healthy",
+        "service": "backend"
+    }
+
+
+@app.get("/db-health")
+def db_health():
+    return check_db()
+
+
+@app.get("/info")
+def info():
+    return {
+        "app": "AgentLoopGen",
+        "environment": os.getenv("ENVIRONMENT", "production"),
+        "version": "2.0.0"
+    }

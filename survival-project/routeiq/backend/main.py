@@ -8,6 +8,7 @@ app = FastAPI(
 )
 
 
+# Root endpoint
 @app.get("/")
 def root():
     return {
@@ -17,6 +18,7 @@ def root():
     }
 
 
+# Health check
 @app.get("/health")
 def health():
     return {
@@ -25,11 +27,13 @@ def health():
     }
 
 
+# Database health check
 @app.get("/db-health")
 def db_health():
     return check_db()
 
 
+# Info endpoint
 @app.get("/info")
 def info():
     return {

@@ -1,14 +1,12 @@
 from fastapi import FastAPI
-from database import check_db
 import os
 
 app = FastAPI(
-    title="AgentLoopGen API",
-    version="2.0.0"
+    title="AgentLoopGen",
+    version="1.0"
 )
 
 
-# Root endpoint
 @app.get("/")
 def root():
     return {
@@ -18,26 +16,24 @@ def root():
     }
 
 
-# Health check
 @app.get("/health")
 def health():
     return {
-        "status": "healthy",
-        "service": "backend"
+        "status": "healthy"
     }
 
 
-# Database health check
-@app.get("/db-health")
-def db_health():
-    return check_db()
-
-
-# Info endpoint
 @app.get("/info")
 def info():
     return {
         "app": "AgentLoopGen",
-        "environment": os.getenv("ENVIRONMENT", "production"),
-        "version": "2.0.0"
+        "environment": os.getenv("ENVIRONMENT", "production")
     }
+
+
+@app.get("/db-health")
+def db_health():
+    return {
+        "database": "connected",
+        "status": "ok"
+    }l

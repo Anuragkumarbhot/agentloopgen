@@ -11,7 +11,7 @@ def get_connection():
     return psycopg2.connect(DATABASE_URL)
 
 # -------------------
-# Health
+# Basic routes
 # -------------------
 
 @app.get("/")
@@ -25,6 +25,10 @@ def root():
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+@app.get("/info")
+def info():
+    return {"app": "AgentLoopGen", "version": "1.0"}
 
 @app.get("/db-health")
 def db_health():
@@ -42,11 +46,12 @@ def db_health():
         }
 
 # -------------------
-# Create table
+# Initialize database
 # -------------------
 
-@app.post("/init-db")
+@app.get("/init-db")
 def init_db():
+
     conn = get_connection()
     cur = conn.cursor()
 
@@ -59,10 +64,13 @@ def init_db():
     """)
 
     conn.commit()
+
     cur.close()
     conn.close()
 
-    return {"message": "agents table created"}
+    return {
+        "message": "agents table created"
+    }
 
 # -------------------
 # Create agent
@@ -82,6 +90,7 @@ def create_agent(name: str):
     agent = cur.fetchone()
 
     conn.commit()
+
     cur.close()
     conn.close()
 
@@ -126,4 +135,6 @@ def delete_agent(agent_id: int):
     cur.close()
     conn.close()
 
-    return {"message": "agent deleted"}
+    return {
+        "message": "agent deleted"
+    }

@@ -1,5 +1,5 @@
-cd ~/agentloopgen
-
-git add .
-git commit -m "Phase 1 foundation"
-git push
+fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
+python-dotenv

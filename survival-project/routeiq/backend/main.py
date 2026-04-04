@@ -7,8 +7,10 @@ app = FastAPI(title="AgentLoopGen")
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
+
 def get_connection():
     return psycopg2.connect(DATABASE_URL)
+
 
 # -------------------
 # Basic routes
@@ -18,35 +20,44 @@ def get_connection():
 def root():
     return {
         "status": "AgentLoopGen running",
-        "phase": "Phase 3",
+        "phase": "Phase 4",
         "service": "backend"
     }
+
 
 @app.get("/health")
 def health():
     return {"status": "ok"}
 
+
 @app.get("/info")
 def info():
-    return {"app": "AgentLoopGen", "version": "1.0"}
+    return {
+        "app": "AgentLoopGen",
+        "version": "1.0"
+    }
+
 
 @app.get("/db-health")
 def db_health():
     try:
         conn = get_connection()
         conn.close()
+
         return {
             "database": "connected",
             "status": "ok"
         }
+
     except Exception as e:
         return {
             "database": "error",
             "details": str(e)
         }
 
+
 # -------------------
-# Initialize database
+# Initialize Agents table
 # -------------------
 
 @app.get("/init-db")
@@ -72,8 +83,39 @@ def init_db():
         "message": "agents table created"
     }
 
+
 # -------------------
-# Create agent
+# Initialize Jobs table
+# -------------------
+
+@app.get("/init-jobs")
+def init_jobs():
+
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS jobs (
+            id SERIAL PRIMARY KEY,
+            task TEXT NOT NULL,
+            status TEXT DEFAULT 'pending',
+            retries INTEGER DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+    conn.commit()
+
+    cur.close()
+    conn.close()
+
+    return {
+        "message": "jobs table created"
+    }
+
+
+# -------------------
+# Agents APIs
 # -------------------
 
 @app.post("/agents")
@@ -96,9 +138,6 @@ def create_agent(name: str):
 
     return agent
 
-# -------------------
-# Get all agents
-# -------------------
 
 @app.get("/agents")
 def get_agents():
@@ -115,9 +154,6 @@ def get_agents():
 
     return agents
 
-# -------------------
-# Delete agent
-# -------------------
 
 @app.delete("/agents/{agent_id}")
 def delete_agent(agent_id: int):
@@ -137,4 +173,68 @@ def delete_agent(agent_id: int):
 
     return {
         "message": "agent deleted"
+    }
+
+
+# -------------------
+# Jobs APIs
+# -------------------
+
+@app.post("/jobs")
+def create_job(task: str):
+
+    conn = get_connection()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+
+    cur.execute(
+        "INSERT INTO jobs (task) VALUES (%s) RETURNING *",
+        (task,)
+    )
+
+    job = cur.fetchone()
+
+    conn.commit()
+
+    cur.close()
+    conn.close()
+
+    return job
+
+
+@app.get("/jobs")
+def get_jobs():
+
+    conn = get_connection()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+
+    cur.execute(
+        "SELECT * FROM jobs ORDER BY id DESC"
+    )
+
+    jobs = cur.fetchall()
+
+    cur.close()
+    conn.close()
+
+    return jobs
+
+
+@app.delete("/jobs/{job_id}")
+def delete_job(job_id: int):
+
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute(
+        "DELETE FROM jobs WHERE id = %s",
+        (job_id,)
+    )
+
+    conn.commit()
+
+    cur.close()
+    conn.close()
+
+    return {
+        "message": "job deleted"
     }

@@ -1,13 +1,9 @@
 from fastapi import FastAPI
 import os
+import psycopg2
 
-app = FastAPI(
-    title="AgentLoopGen",
-    version="2.0"
-)
+app = FastAPI(title="AgentLoopGen")
 
-
-# Root endpoint
 @app.get("/")
 def root():
     return {
@@ -16,30 +12,29 @@ def root():
         "service": "backend"
     }
 
-
-# Health check
 @app.get("/health")
 def health():
-    return {
-        "status": "healthy",
-        "service": "backend"
-    }
+    return {"status": "ok"}
 
-
-# Database health check (simple test endpoint)
-@app.get("/db-health")
-def db_health():
-    return {
-        "database": "connected",
-        "status": "ok"
-    }
-
-
-# Info endpoint
 @app.get("/info")
 def info():
-    return {
-        "app": "AgentLoopGen",
-        "environment": os.getenv("ENVIRONMENT", "production"),
-        "version": "2.0"
-    }
+    return {"app": "AgentLoopGen", "version": "1.0"}
+
+@app.get("/db-health")
+def db_health():
+    try:
+        conn = psycopg2.connect(
+            os.environ.get("DATABASE_URL")
+        )
+        conn.close()
+
+        return {
+            "database": "connected",
+            "status": "ok"
+        }
+
+    except Exception as e:
+        return {
+            "database": "error",
+            "details": str(e)
+        }

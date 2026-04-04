@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+import os
 
 app = FastAPI(
     title="AgentLoopGen",
@@ -9,7 +10,9 @@ app = FastAPI(
 @app.get("/")
 def root():
     return {
-        "status": "AgentLoopGen running"
+        "status": "AgentLoopGen running",
+        "phase": "Phase 2",
+        "service": "backend"
     }
 
 
@@ -25,5 +28,6 @@ def info():
     return {
         "service": "AgentLoopGen",
         "version": "1.0",
-        "environment": "production"
+        "environment": os.getenv("ENVIRONMENT", "production"),
+        "platform": "Render"
     }

@@ -1,21 +1,95 @@
-
 from fastapi import FastAPI
+from sqlalchemy import create_engine, Column, Integer, String, DateTime
+from sqlalchemy.orm import sessionmaker, declarative_base
+from datetime import datetime
 import os
-import psycopg2
-from psycopg2.extras import RealDictCursor
+
+# -------------------------
+# DATABASE CONFIG
+# -------------------------
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True
+)
+
+SessionLocal = sessionmaker(
+    autocommit=False,
+    autoflush=False,
+    bind=engine
+)
+
+Base = declarative_base()
+
+# -------------------------
+# FASTAPI APP
+# -------------------------
 
 app = FastAPI(title="AgentLoopGen")
 
-DATABASE_URL = os.environ.get("DATABASE_URL")
+# -------------------------
+# AGENT MODEL
+# -------------------------
+
+class Agent(Base):
+    __tablename__ = "agents"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    name = Column(String)
+
+    status = Column(String, default="active")
+
+    created_at = Column(
+        DateTime,
+        default=datetime.utcnow
+    )
 
 
-def get_connection():
-    return psycopg2.connect(DATABASE_URL)
+# -------------------------
+# JOB MODEL
+# -------------------------
+
+class Job(Base):
+    __tablename__ = "jobs"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    agent_id = Column(Integer)
+
+    task = Column(String)
+
+    status = Column(
+        String,
+        default="pending"
+    )
+
+    attempts = Column(
+        Integer,
+        default=0
+    )
+
+    max_attempts = Column(
+        Integer,
+        default=3
+    )
+
+    created_at = Column(
+        DateTime,
+        default=datetime.utcnow
+    )
+
+    updated_at = Column(
+        DateTime,
+        default=datetime.utcnow
+    )
 
 
-# -------------------
-# Basic routes
-# -------------------
+# -------------------------
+# ROOT
+# -------------------------
 
 @app.get("/")
 def root():
@@ -26,24 +100,31 @@ def root():
     }
 
 
+# -------------------------
+# HEALTH CHECK
+# -------------------------
+
 @app.get("/health")
 def health():
-    return {"status": "ok"}
-
-
-@app.get("/info")
-def info():
     return {
-        "app": "AgentLoopGen",
-        "version": "1.0"
+        "status": "ok"
     }
 
 
+# -------------------------
+# DATABASE HEALTH
+# -------------------------
+
 @app.get("/db-health")
 def db_health():
+
     try:
-        conn = get_connection()
-        conn.close()
+
+        db = SessionLocal()
+
+        db.execute("SELECT 1")
+
+        db.close()
 
         return {
             "database": "connected",
@@ -51,191 +132,198 @@ def db_health():
         }
 
     except Exception as e:
+
         return {
             "database": "error",
-            "details": str(e)
+            "message": str(e)
         }
 
 
-# -------------------
-# Initialize Agents table
-# -------------------
+# -------------------------
+# INIT AGENTS TABLE
+# -------------------------
 
 @app.get("/init-db")
 def init_db():
 
-    conn = get_connection()
-    cur = conn.cursor()
-
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS agents (
-            id SERIAL PRIMARY KEY,
-            name TEXT NOT NULL,
-            status TEXT DEFAULT 'active'
-        )
-    """)
-
-    conn.commit()
-
-    cur.close()
-    conn.close()
+    Base.metadata.create_all(bind=engine)
 
     return {
         "message": "agents table created"
     }
 
 
-# -------------------
-# Initialize Jobs table
-# -------------------
+# -------------------------
+# INIT JOBS TABLE
+# -------------------------
 
 @app.get("/init-jobs")
 def init_jobs():
 
-    conn = get_connection()
-    cur = conn.cursor()
-
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS jobs (
-            id SERIAL PRIMARY KEY,
-            task TEXT NOT NULL,
-            status TEXT DEFAULT 'pending',
-            retries INTEGER DEFAULT 0,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    """)
-
-    conn.commit()
-
-    cur.close()
-    conn.close()
+    Base.metadata.create_all(bind=engine)
 
     return {
         "message": "jobs table created"
     }
 
 
-# -------------------
-# Agents APIs
-# -------------------
+# -------------------------
+# CREATE AGENT
+# -------------------------
 
 @app.post("/agents")
 def create_agent(name: str):
 
-    conn = get_connection()
-    cur = conn.cursor(cursor_factory=RealDictCursor)
+    db = SessionLocal()
 
-    cur.execute(
-        "INSERT INTO agents (name) VALUES (%s) RETURNING *",
-        (name,)
+    agent = Agent(
+        name=name,
+        status="active"
     )
 
-    agent = cur.fetchone()
+    db.add(agent)
 
-    conn.commit()
+    db.commit()
 
-    cur.close()
-    conn.close()
+    db.refresh(agent)
 
-    return agent
+    db.close()
 
+    return {
+        "id": agent.id,
+        "name": agent.name,
+        "status": agent.status
+    }
+
+
+# -------------------------
+# GET AGENTS
+# -------------------------
 
 @app.get("/agents")
 def get_agents():
 
-    conn = get_connection()
-    cur = conn.cursor(cursor_factory=RealDictCursor)
+    db = SessionLocal()
 
-    cur.execute("SELECT * FROM agents")
+    agents = db.query(Agent).all()
 
-    agents = cur.fetchall()
-
-    cur.close()
-    conn.close()
+    db.close()
 
     return agents
 
 
+# -------------------------
+# DELETE AGENT
+# -------------------------
+
 @app.delete("/agents/{agent_id}")
 def delete_agent(agent_id: int):
 
-    conn = get_connection()
-    cur = conn.cursor()
+    db = SessionLocal()
 
-    cur.execute(
-        "DELETE FROM agents WHERE id = %s",
-        (agent_id,)
-    )
+    agent = db.query(Agent).filter(
+        Agent.id == agent_id
+    ).first()
 
-    conn.commit()
+    if agent:
 
-    cur.close()
-    conn.close()
+        db.delete(agent)
+
+        db.commit()
+
+        db.close()
+
+        return {
+            "message": "agent deleted"
+        }
+
+    db.close()
 
     return {
-        "message": "agent deleted"
+        "message": "agent not found"
     }
 
 
-# -------------------
-# Jobs APIs
-# -------------------
+# -------------------------
+# CREATE JOB
+# -------------------------
 
 @app.post("/jobs")
-def create_job(task: str):
+def create_job(
+    agent_id: int,
+    task: str
+):
 
-    conn = get_connection()
-    cur = conn.cursor(cursor_factory=RealDictCursor)
+    db = SessionLocal()
 
-    cur.execute(
-        "INSERT INTO jobs (task) VALUES (%s) RETURNING *",
-        (task,)
+    job = Job(
+        agent_id=agent_id,
+        task=task,
+        status="pending"
     )
 
-    job = cur.fetchone()
+    db.add(job)
 
-    conn.commit()
+    db.commit()
 
-    cur.close()
-    conn.close()
+    db.refresh(job)
 
-    return job
+    db.close()
 
+    return {
+        "id": job.id,
+        "status": job.status
+    }
+
+
+# -------------------------
+# GET JOBS
+# -------------------------
 
 @app.get("/jobs")
 def get_jobs():
 
-    conn = get_connection()
-    cur = conn.cursor(cursor_factory=RealDictCursor)
+    db = SessionLocal()
 
-    cur.execute(
-        "SELECT * FROM jobs ORDER BY id DESC"
-    )
+    jobs = db.query(Job).all()
 
-    jobs = cur.fetchall()
-
-    cur.close()
-    conn.close()
+    db.close()
 
     return jobs
 
 
-@app.delete("/jobs/{job_id}")
-def delete_job(job_id: int):
+# -------------------------
+# UPDATE JOB STATUS
+# -------------------------
 
-    conn = get_connection()
-    cur = conn.cursor()
+@app.put("/jobs/{job_id}")
+def update_job_status(
+    job_id: int,
+    status: str
+):
 
-    cur.execute(
-        "DELETE FROM jobs WHERE id = %s",
-        (job_id,)
-    )
+    db = SessionLocal()
 
-    conn.commit()
+    job = db.query(Job).filter(
+        Job.id == job_id
+    ).first()
 
-    cur.close()
-    conn.close()
+    if job:
+
+        job.status = status
+
+        job.updated_at = datetime.utcnow()
+
+        db.commit()
+
+        db.close()
+
+        return {
+            "message": "job updated"
+        }
+
+    db.close()
 
     return {
-        "message": "job deleted"
+        "message": "job not found"
     }

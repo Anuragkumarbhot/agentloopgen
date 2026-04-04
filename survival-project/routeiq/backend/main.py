@@ -1,7 +1,8 @@
 from fastapi import FastAPI
+from config import settings
 
 app = FastAPI(
-    title="AgentLoopGen",
+    title=settings.APP_NAME,
     version="1.0"
 )
 
@@ -10,13 +11,22 @@ app = FastAPI(
 def root():
     return {
         "status": "AgentLoopGen running",
-        "phase": "Phase 1",
-        "service": "backend"
+        "environment": settings.ENVIRONMENT
     }
 
 
 @app.get("/health")
 def health():
     return {
-        "status": "healthy"
+        "status": "healthy",
+        "service": settings.APP_NAME
+    }
+
+
+@app.get("/info")
+def info():
+    return {
+        "app": settings.APP_NAME,
+        "env": settings.ENVIRONMENT,
+        "port": settings.PORT
     }
